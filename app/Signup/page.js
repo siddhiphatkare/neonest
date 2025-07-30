@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 export default function SignupPage() {
   useEffect(() => {
@@ -18,6 +20,7 @@ export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // State for validation errors
   const [nameError, setNameError] = useState("");
@@ -91,6 +94,10 @@ export default function SignupPage() {
     const value = e.target.value;
     setPassword(value);
     validatePassword(value);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
   };
 
   // Determine if the form is valid and button should be enabled
@@ -207,21 +214,28 @@ export default function SignupPage() {
           )}
         </div>
 
-        <div className="mb-6">
-          <input
-            type="password"
-            placeholder="Create Password"
-            value={password}
-            onChange={handlePasswordChange}
-            onBlur={() => setPasswordTouched(true)}
-            required
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2
-              ${(passwordError && passwordTouched) ? 'border-red-500 focus:ring-red-400' : 'border-pink-300 focus:ring-pink-400'}
-            `}
-          />
-          <p className="text-[11px] mt-1 text-gray-700 italic">Password must be at least 6 characters.</p>
-          {(passwordError && passwordTouched) && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
-        </div>
+          <div className="mb-6 relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Create Password"
+              value={password}
+              onChange={handlePasswordChange}
+              onBlur={() => setPasswordTouched(true)}
+              required
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2
+                ${(passwordError && passwordTouched) ? 'border-red-500 focus:ring-red-400' : 'border-pink-300 focus:ring-pink-400'}
+              `}
+            />
+            <FontAwesomeIcon
+              icon={showPassword ? faEyeSlash : faEye}
+              onClick={togglePasswordVisibility}
+              className="absolute right-3 top-1/3 translate-y-[-50%]  cursor-pointer text-gray-500"
+              style={{ userSelect: "none" }}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            />
+            <p className="text-[11px] mt-1 text-gray-700 italic">Password must be at least 6 characters.</p>
+            {(passwordError && passwordTouched) && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
+          </div>
 
         <p className="text-center text-sm text-gray-500 mb-4">
           At NeoNest, your data privacy is paramount. We are committed to

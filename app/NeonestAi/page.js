@@ -112,6 +112,12 @@ export default function NeonestAi() {
     return () => el?.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const [clientTimestamp, setClientTimestamp] = useState(null);
+
+  useEffect(() => {
+    setClientTimestamp(Date.now());
+  }, []);
+
   const handleSubmit = async (e = null, customInput = null) => {
     if (e) e.preventDefault();
     const finalInput = customInput !== null ? customInput : input;
@@ -119,10 +125,10 @@ export default function NeonestAi() {
     if (!finalInput.trim()) return;
 
     const newMessage = {
-      id: Date.now(),
+      id: clientTimestamp,
       role: "user",
       content: finalInput,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(clientTimestamp).toISOString(),
     };
 
     const updatedMessages = [...messages, newMessage];
@@ -142,10 +148,10 @@ export default function NeonestAi() {
     } catch (err) {
       console.error("Error sending message:", err);
       const errorMsg = {
-        id: Date.now() + 1,
+        id: clientTimestamp + 1,
         role: "system",
         content: "Oops! Something went wrong. Please try again.",
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(clientTimestamp).toISOString(),
       };
       setChatHistory(role, [...updatedMessages, errorMsg]);
     } finally {

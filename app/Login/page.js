@@ -7,6 +7,8 @@ import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 
 export default function LoginPage() {
@@ -16,6 +18,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { isAuth, login } = useAuth();
 
@@ -62,6 +65,10 @@ export default function LoginPage() {
     const value = e.target.value;
     setPassword(value);
     validatePassword(value);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
   };
 
   const isFormValid = useMemo(() => {
@@ -171,7 +178,7 @@ export default function LoginPage() {
           {(emailError && emailTouched) && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
         </div>
 
-        <div className="mb-6">
+        <div className="mb-6 relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Password
           </label>
@@ -180,13 +187,20 @@ export default function LoginPage() {
           `}>
             <Lock className="w-5 h-5 text-gray-400 mr-2" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               value={password}
               onChange={handlePasswordChange}
               onBlur={() => setPasswordTouched(true)} 
               required
               className="w-full bg-transparent focus:outline-none"
+            />
+            <FontAwesomeIcon
+              icon={showPassword ? faEyeSlash : faEye}
+              onClick={togglePasswordVisibility}
+              className="absolute right-3 cursor-pointer text-gray-500"
+              style={{ userSelect: "none" }}
+              aria-label={showPassword ? "Hide password" : "Show password"}
             />
           </div>
           {(passwordError && passwordTouched) && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}

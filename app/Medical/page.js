@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
@@ -7,20 +6,10 @@ import Input from "../components/ui/Input"
 import { Button } from "../components/ui/Button"
 import ImportantContacts from "../components/ImportantContacts "
 import Badge from "../components/ui/Badge"
-import {
-  Plus,
-  Shield,
-  Calendar,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Upload,
-  FileText,
-  Edit,
-  Trash2,
-  Bell,
-  Save,
-} from "lucide-react"
+import {Plus,Shield,Calendar,AlertTriangle,CheckCircle,Clock,Upload,FileText,Edit,Trash2,Bell,Save,} from "lucide-react"
+import { useAuth } from "../context/AuthContext"
+import LoginPrompt from "../components/LoginPrompt"
+
 
 function getVaccineStatus(vaccine) {
   const today = new Date()
@@ -63,8 +52,8 @@ const staticStandardVaccines = [
   { name: "Hepatitis A", ageMonths: 12, description: "First dose" },
 ];
 
-
 export default function VaccineTracker({ babyId }) {
+  const { isAuth } = useAuth()
   const [vaccines, setVaccines] = useState([])
   const [babyBirthDate, setBabyBirthDate] = useState("")
   const [isAddingVaccine, setIsAddingVaccine] = useState(false)
@@ -82,9 +71,11 @@ export default function VaccineTracker({ babyId }) {
 
   useEffect(() => {
     document.title = "Medical | NeoNest"
+    if (isAuth) {
     fetchVaccines()
     // fetchBabyBirthDate() 
-  }, [])
+    }
+  }, [isAuth])
 
   const fetchVaccines = async () => {
     try {
@@ -98,27 +89,13 @@ export default function VaccineTracker({ babyId }) {
     }
   }
 
-  // const fetchBabyBirthDate = async () => {
-  //   try {
-  //     const token = getAuthToken()
-  //     const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/baby/${babyId}`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     if (res.data && res.data.birthDate) {
-  //       setBabyBirthDate(res.data.birthDate.split("T")[0]) 
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching baby birth date:", error)
-  //   }
-  // }
-
   const initializeStandardSchedule = async () => {
     if (!babyBirthDate) return; 
 
     try {
       const token = getAuthToken()
       await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/vaccine/initialize-schedule`, 
+        "/api/vaccine/initialize-schedule", 
         { babyId, birthDate: babyBirthDate },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -137,7 +114,7 @@ export default function VaccineTracker({ babyId }) {
     try {
       const token = getAuthToken()
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/vaccine`,
+        "/api/vaccine",
         { ...newVaccine, babyId },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -155,7 +132,7 @@ export default function VaccineTracker({ babyId }) {
     try {
       const token = getAuthToken()
       await axios.put( 
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/vaccine/${editingVaccine._id}`, 
+        `/api/vaccine/${editingVaccine._id}`, 
         { ...editingVaccine, babyId },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -170,7 +147,7 @@ export default function VaccineTracker({ babyId }) {
     try {
       const token = getAuthToken()
       await axios.delete(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/vaccine/${id}`, 
+        `/api/vaccine/${id}`, 
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -182,18 +159,25 @@ export default function VaccineTracker({ babyId }) {
   }
 
   const markAsCompleted = async (id) => {
-    try {
-      const token = getAuthToken()
-      await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/vaccine/${id}/complete`, 
-        { completedDate: new Date().toISOString().split("T")[0] },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      fetchVaccines() 
-    } catch (error) {
-      console.error("Error marking vaccine as completed:", error)
-    }
+  try {
+    const token = getAuthToken();
+    await axios.patch(
+      `/api/vaccine`,
+      {
+        vaccineId: id,
+        newStatus: "completed"
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    fetchVaccines();
+  } catch (error) {
+    console.error("Error marking vaccine as completed:", error);
   }
+};
 
   const handleFileUpload = (e, targetVaccine = null) => {
     const file = e.target.files[0]
@@ -233,10 +217,15 @@ export default function VaccineTracker({ babyId }) {
   })
 
 
+  // Show login prompt if user is not authenticated
+  if (!isAuth) {
+    return <LoginPrompt sectionName="medical records" />;
+  }
+
   return (
-    <div className="p-6 space-y-6 container mx-auto">
+    <div className="p-6 md:p-6 md:mx-20 lg:mx-0 w-full space-y-6 mx-auto">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold text-gray-800">Medical Records: Vaccines & Important Contacts</h2>
           <p className="text-gray-600">Keep track of your baby's vaccination schedule and essential medical contacts for quick access.</p>
@@ -249,7 +238,7 @@ export default function VaccineTracker({ babyId }) {
           }}
           className="bg-gradient-to-r from-blue-500 to-pink-500 hover:from-blue-600 hover:to-pink-600"
         >
-          <Plus className="w-4 h-4 mr-2" />
+        <Plus className="w-4 h-4 mr-2" />
           Add Vaccine
         </Button>
       </div>
@@ -267,7 +256,7 @@ export default function VaccineTracker({ babyId }) {
             <p className="text-gray-600">
               Enter your baby's birth date to automatically generate the standard vaccination schedule.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-4 flex-wrap">
               <Input
                 type="date"
                 value={babyBirthDate}

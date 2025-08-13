@@ -7,16 +7,9 @@ import { Button } from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import InteractionWithBaby from "../components/InteractionWithBaby";
 import MilestoneTracker from "../components/MilestoneTracker";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
+import { useAuth } from "../context/AuthContext";
+import LoginPrompt from "../components/LoginPrompt";
 
 import GrowthChart from "./GrowthChart";
 
@@ -192,6 +185,8 @@ const DatePicker = ({ value, onChange, placeholder = "Select date" }) => {
 };
 
 export default function GrowthPage() {
+  const { isAuth } = useAuth();
+  
   useEffect(() => {
     document.title = "Growth | NeoNest";
   }, []);
@@ -314,10 +309,15 @@ export default function GrowthPage() {
     return "10+ months";
   };
 
+  // Show login prompt if user is not authenticated
+  if (!isAuth) {
+    return <LoginPrompt sectionName="growth tracking" />;
+  }
+
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <h2 className="text-3xl font-bold text-gray-800">Growth Tracker</h2>
-      <p className="text-gray-600">Log your baby's growth, track milestones, visualize progress and see ML predictions.</p>
+    <div className="container max-w-6xl mx-auto px-4 sm:px-6 space-y-6">
+      <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Growth Tracker</h2>
+      <p className="text-gray-600">Log your baby's growth, track milestones, and visualize progress over time.</p>
 
       <div className="bg-white p-4 rounded-lg shadow">
         <h3 className="text-xl font-semibold mb-4">Baby Information</h3>
@@ -372,7 +372,7 @@ export default function GrowthPage() {
           <div className="bg-white p-4 rounded-lg shadow space-y-3">
             <h3 className="text-xl font-semibold">Growth Log Entries</h3>
             {growthLogs.map(log => (
-              <div key={log.id} className="border-b py-2 flex justify-between items-center">
+              <div key={log.id} className="border-b py-3 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                 <div>
                   <p className="font-medium">{log.date}</p>
                   <p className="text-sm text-gray-600">📏 {log.height} cm | ⚖️ {log.weight} kg | 🧠 {log.head} cm</p>
@@ -386,14 +386,19 @@ export default function GrowthPage() {
             ))}
           </div>
 
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div className="bg-white p-4 rounded-lg shadow overflow-x-auto">
             <h3 className="text-xl font-semibold flex items-center gap-2 mb-4">
               <BarChart3 /> Growth Chart
             </h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={growthLogs} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" angle={-45} textAnchor="end" label={{ value: "Date", position: "insideBottom", offset: -30 }} />
+                <XAxis 
+                  dataKey="date" 
+                  angle={-45} 
+                  textAnchor="end" 
+                  label={{ value: "Date", position: "insideBottom", offset: -20 }} 
+                />
                 <YAxis yAxisId="left" label={{ value: "Height (cm)", angle: -90, position: "insideLeft" }} />
                 <YAxis yAxisId="right" orientation="right" label={{ value: "Weight (kg)", angle: 90, position: "insideRight" }} />
                 <Tooltip />
@@ -413,13 +418,15 @@ export default function GrowthPage() {
       {/* ===== ML Predictive Chart (separate, non-WHO) ===== */}
       <GrowthChart defaultMonths={6} />
 
-      <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-xl font-semibold mb-4">Developmental Milestones</h3>
-        <MilestoneTracker babyDOB={babyDOB} />
-      </div>
+      <div className="space-y-6">
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+          <h3 className="text-xl font-semibold mb-4">Developmental Milestones</h3>
+          <MilestoneTracker babyDOB={babyDOB} />
+        </div>
 
-      <div className="bg-white p-4 rounded-lg shadow">
-        <InteractionWithBaby />
+        <div className="bg-white p-4 rounded-lg shadow">
+          <InteractionWithBaby />
+        </div>
       </div>
 
       {hasBadge && (
@@ -428,7 +435,7 @@ export default function GrowthPage() {
         </div>
       )}
 
-      <div className="text-center text-gray-500 text-sm mt-10 mb-6">
+      <div className="text-center text-gray-500 text-sm py-8">
         For more information regarding this section, visit{" "}
         <a href="/Resources" className="text-pink-600 hover:underline">Resources</a> or{" "}
         <a href="/Faqs" className="text-pink-600 hover:underline">FAQs</a>.

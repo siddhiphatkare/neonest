@@ -172,11 +172,9 @@ export async function POST(req) {
       );
     }
 
-    // IMPORTANT: Ensure this password length check matches your frontend (if it's 8, use < 6)
-    // Your frontend has < 6 now, but this line still has < 6. Let's make it consistent.
-    if (password.length < 6) { // Changed from < 6 to < 6 for consistency with 8 characters minimum
+    if (password.length < 6) {
       return Response.json(
-        { error: "Password must be at least 8 characters" },
+        { error: "Password must be at least 6 characters" },
         { status: 422 }
       );
     }
@@ -294,37 +292,3 @@ export async function PUT(req) {
     return Response.json({ error: "Server error" }, { status: 500 });
   }
 }
-
-/*
-export async function POST(req) {
-  try {
-    const body = await req.json();
-    const { name, email, password } = body;
-
-    if (!name || !email || !password) {
-      return Response.json({ error: "Please provide all details" }, { status: 422 });
-    }
-
-    if (!email.includes("@")) {
-      return Response.json({ error: "Please enter valid email id" }, { status: 422 });
-    }
-
-    if (password.length < 8) {
-      return Response.json({ error: "Password must be at least 8 characters" }, { status: 422 });
-    }
-
-    // Mock success without DB
-    return Response.json(
-      {
-        success: "User registered successfully (mocked).",
-        newUser: { id: "temp-id", name, email },
-        token: "mock-jwt-token"
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error("Mock signup error:", error);
-    return Response.json({ error: "Server error" }, { status: 500 });
-  }
-}
-*/

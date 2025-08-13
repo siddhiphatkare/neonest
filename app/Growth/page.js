@@ -316,7 +316,7 @@ export default function GrowthPage() {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <h2 className="text-3xl font-bold text-gray-800 ">Growth Tracker</h2>
+      <h2 className="text-3xl font-bold text-gray-800">Growth Tracker</h2>
       <p className="text-gray-600">Log your baby's growth, track milestones, visualize progress and see ML predictions.</p>
 
       <div className="bg-white p-4 rounded-lg shadow">
@@ -387,7 +387,9 @@ export default function GrowthPage() {
           </div>
 
           <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-xl font-semibold flex items-center gap-2 mb-4"><BarChart3 /> Growth Chart</h3>
+            <h3 className="text-xl font-semibold flex items-center gap-2 mb-4">
+              <BarChart3 /> Growth Chart
+            </h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={growthLogs} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
                 <CartesianGrid strokeDasharray="3 3" />
